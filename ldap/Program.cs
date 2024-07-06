@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿// References:
+// https://ianatkinson.net/computing/adcsharp.htm
+
+using Microsoft.Extensions.Configuration;
 using System.DirectoryServices;
 
 var builder = new ConfigurationBuilder().AddJsonFile($"config.json", true, true);
@@ -11,11 +14,36 @@ var ADPassword = config["ADPassword"];
 DirectoryEntry myLdapConnection = createDirectoryEntry(ADIP, ADUser, ADPassword);
 DirectorySearcher search = new(myLdapConnection);
 
-var username = "pu1";
+var username = "ou1_u1";
 var updatedTitle = "Software Engineer";
 
-SearchUser(search,username);
-UpdateUser(search,username,updatedTitle);
+// SearchUser(search,username);
+// UpdateUser(search,username,updatedTitle);
+AllUsers(search);
+
+static void AllUsers(DirectorySearcher search)
+{
+    try
+    {
+        search.PropertiesToLoad.Add("cn");
+
+        SearchResultCollection allUsers = search.FindAll();
+
+        foreach (SearchResult result in allUsers)
+        {
+            if (result.Properties["cn"].Count > 0)
+            {
+                Console.WriteLine(result.Properties["cn"][0].ToString());
+            }
+        }
+    }
+
+    catch (Exception e)
+    {
+        Console.WriteLine("Exception caught:\n\n" + e.ToString());
+    }
+
+}
 
 static DirectoryEntry createDirectoryEntry(string ADIP, string ADUser, string ADPassword)
 {
