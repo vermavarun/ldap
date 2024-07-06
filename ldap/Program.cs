@@ -15,11 +15,25 @@ DirectoryEntry myLdapConnection = createDirectoryEntry(ADIP, ADUser, ADPassword)
 DirectorySearcher search = new(myLdapConnection);
 
 var username = "ou1_u1";
+var password = "";
 var updatedTitle = "Software Engineer";
 
-// SearchUser(search,username);
-// UpdateUser(search,username,updatedTitle);
-AllUsers(search);
+//////////////////////////////////////////////////////////////
+//SearchUser(search,username);
+//////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////
+//UpdateUser(search,username,updatedTitle);
+//////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////
+//AllUsers(search);
+//////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////
+bool isAuth = AuthenticateUser(ADIP, username, password);
+Console.WriteLine(isAuth);
+//////////////////////////////////////////////////////////////
 
 static void AllUsers(DirectorySearcher search)
 {
@@ -111,4 +125,26 @@ static void UpdateUser(DirectorySearcher search, string username, string newTitl
     }
 
     else Console.WriteLine("User not found!");
-}  
+}
+
+static bool AuthenticateUser(string ADIP, string userName, string password)
+{
+    bool ret = false;
+
+    try
+    {
+        DirectoryEntry ldapConnection = new DirectoryEntry("LDAP://" + ADIP + ":389", userName, password);
+        DirectorySearcher dsearch = new DirectorySearcher(ldapConnection);
+        SearchResult results = null;
+
+        results = dsearch.FindOne();
+
+        ret = true;
+    }
+    catch
+    {
+        ret = false;
+    }
+
+    return ret;
+}
