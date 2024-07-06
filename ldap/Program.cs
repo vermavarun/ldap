@@ -15,7 +15,7 @@ var ADPassword = config["ADPassword"];
 DirectoryEntry myLdapConnection = createDirectoryEntry(ADIP, ADUser, ADPassword);
 DirectorySearcher search = new(myLdapConnection);
 
-var username = "ou1_u1";
+var username = "pu1";
 var password = "";
 var updatedTitle = "Software Engineer";
 
@@ -35,7 +35,15 @@ var updatedTitle = "Software Engineer";
 //bool isAuth = AuthenticateUser(ADIP, username, password);
 //Console.WriteLine(isAuth);
 //////////////////////////////////////////////////////////////
-GetAllGroups(search);
+
+//////////////////////////////////////////////////////////////
+//GetAllGroups(search);
+//////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////
+bool isAdmin = IsUserAdmin(search, username);
+Console.WriteLine(isAdmin);
+//////////////////////////////////////////////////////////////
 
 static void AllUsers(DirectorySearcher search)
 {
@@ -92,6 +100,7 @@ static void SearchUser(DirectorySearcher search,string username)
                 Console.WriteLine(String.Format("{0,-20} : {1}",
                               ldapField, myCollection.ToString()));
         }
+     
     }
 
     else
@@ -185,4 +194,27 @@ static void GetAllGroups(DirectorySearcher ds)
             }
         }
     }
+}
+
+static bool IsUserAdmin(DirectorySearcher search, string username)
+{
+    search.Filter = $"(cn={username})";
+    search.PropertiesToLoad.Add("memberOf");
+    List<string> groups = new List<string>();
+    // create results objects from search object  
+
+    SearchResult result = search.FindOne();
+
+    if (result != null)
+    {
+        foreach (object memberOf in result.Properties["memberOf"])
+        {
+            groups.Add(memberOf.ToString().Split("CN=")[1].Split(",")[0]);
+
+            // All Groups of current user.
+            // Console.WriteLine(memberOf.ToString().Split("CN=")[1].Split(",")[0]);  
+        }
+
+    }
+    return groups.Contains("Administrators");
 }
