@@ -2,6 +2,7 @@
 // https://ianatkinson.net/computing/adcsharp.htm
 
 using Microsoft.Extensions.Configuration;
+using System.Diagnostics;
 using System.DirectoryServices;
 
 var builder = new ConfigurationBuilder().AddJsonFile($"config.json", true, true);
@@ -31,9 +32,10 @@ var updatedTitle = "Software Engineer";
 //////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////
-bool isAuth = AuthenticateUser(ADIP, username, password);
-Console.WriteLine(isAuth);
+//bool isAuth = AuthenticateUser(ADIP, username, password);
+//Console.WriteLine(isAuth);
 //////////////////////////////////////////////////////////////
+GetAllGroups(search);
 
 static void AllUsers(DirectorySearcher search)
 {
@@ -147,4 +149,40 @@ static bool AuthenticateUser(string ADIP, string userName, string password)
     }
 
     return ret;
+}
+
+static void GetAllGroups(DirectorySearcher ds)
+{
+    // Sort by name
+    ds.Sort = new SortOption("name", SortDirection.Ascending);
+    ds.PropertiesToLoad.Add("name");
+    ds.PropertiesToLoad.Add("memberof");
+    ds.PropertiesToLoad.Add("member");
+
+    ds.Filter = "(&(objectCategory=Group))";
+
+    var results = ds.FindAll();
+
+    foreach (SearchResult sr in results)
+    {
+        if (sr.Properties["name"].Count > 0)
+            Debug.WriteLine(sr.Properties["name"][0].ToString());
+
+        if (sr.Properties["memberof"].Count > 0)
+        {
+            Debug.WriteLine("  Member of...");
+            foreach (string item in sr.Properties["memberof"])
+            {
+                Console.WriteLine("    " + item);
+            }
+        }
+        if (sr.Properties["member"].Count > 0)
+        {
+            Debug.WriteLine("  Members");
+            foreach (string item in sr.Properties["member"])
+            {
+                Console.WriteLine("    " + item);
+            }
+        }
+    }
 }
